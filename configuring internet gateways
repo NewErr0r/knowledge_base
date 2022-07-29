@@ -1,0 +1,27 @@
+################################# VyOS #################################
+
+# configure
+# set nat source rule <№> outbound-interface <внешний интерфейс>
+# set nat source rule <№> source address "<внутренняя сеть>" 
+# set nat source rule <№> translation address masquerade
+# commit
+# save
+###########################################################################
+
+################################# CentOS 8 #################################
+
+# firewall-cmd --permanent --zone=trusted --add-interface=<внутренний (е) интерфейс (ы)>
+# firewall-cmd --permanent --zone=public --add-interface=<внешний интерфейс>
+# firewall-cmd --permanent --zone=public --add-masquerade
+# firewall-cmd --reload
+###########################################################################
+
+################################# Debian #################################
+
+# apt install -y iptables
+# iptables -t nat -A POSTROUTING -o <внешний интерфейс> -j MASQUERADE
+# iptables-save
+###########################################################################
+
+P.S.
+# echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
