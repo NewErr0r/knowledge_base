@@ -1,0 +1,51 @@
+######################## NTP Server ############################
+
+Установка часового пояса:
+# timedatectl set-timezone Europe/Moscow
+
+# dnf install -y crhony
+# systemctl enable --now crhonyd
+
+Редактирование конфигурационного файла:
+# vim /etc/chrony.conf
+...
+	   server 0.ru.pool.ntp.org iburst
+	   server 1.ru.pool.ntp.org
+	   server 2.ru.pool.ntp.org
+	   server 3.ru.pool.ntp.org
+...
+
+Синхронизация NTP:
+# timedatectl set-ntp true
+# systemctl restart chronyd
+
+# firewall-cmd --permanent --add-service=ntp
+# firewall-cmd --reload
+
+Проверка:
+# chronyc sources
+
+######################## NTP Client ############################
+
+# timedatectl set-timezone Europe/Moscow
+# dnf install -y chrony
+
+Редактирование конфигурационного файла:
+# vim /etc/chrony.conf
+  server <ip_address_ntp_server>
+
+# timedatectl set-ntp true
+# systemctl enable --now chronyd
+
+# chronyc sources
+
+######################## NTP Client ( Windows ) ############################
+
+# w32tm /config /manualpeerlist:"<ip_address>,0x8" /syncfromflags:manual /update
+
+Проверка:
+# w32tm /stripchart /computer:<ip_address> /dataonly /samles:3
+
+# w32tm /query /configuration
+# w32tm /query /status
+# Time /T
