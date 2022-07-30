@@ -1,0 +1,112 @@
+#################################  DNS Server (CentOS) #################################
+                                    Master (главный)
+
+# dnf install -y bind
+
+# vim /etc/named.conf
+    allow-query { any; };
+    allow-transfer  { ip_address_slave_server };
+    recursion   no; #(yes)
+
+    #зона прямого просмотра
+    zone "test.local" IN {
+        type master;
+        file "test.local";
+        allow-update { none; };
+    }
+
+    #зона обратного просмотра (x.x.x - сеть)
+    zone "x.x.x.in-addr.arpa" IN {
+        type master;
+        file "x.x.x.in-addr.arpa";
+        allow-update { none; };
+    }
+
+Создание файлов зон прямого/обратного просмотра:
+
+# vim /var/named/test.local
+
+$TTL 86400
+@   IN  SOA     dns1.test.local.    root.test.local. (
+        2019112201  ;Serial
+        3600        ;Refresh
+        1800        ;Retry
+        604800      ;Expire
+        86400       ;Minimum TTL
+)
+    IN  NS      dns1.test.local.
+    IN  NS      dns2.test.local.
+    IN  A       <ip_address_master_server>
+dns1    IN  A   <ip_address>
+dns2    IN  A   <ip_address>
+SRV     IN  A   <ip_address>
+...     ... ... ...
+
+# vim /var/named/x.x.x.in-addr.arpa
+
+$TTL 86400
+@   IN  SOA     dns1.test.local.    root.test.local. (
+        2019112201  ;Serial
+        3600        ;Refresh
+        1800        ;Retry
+        604800      ;Expire
+        86400       ;Minimum TTL
+)
+    IN  NS      dns1.test.local.
+88      IN  PTR     dns1.test.local.
+94      IN  PTR     dns2.test.local.
+97      IN  PTR     SRV.test.local.
+...     ... ... ...
+
+Настроить resolv:
+# vim /etc/resolv.conf
+    nameserver <ip_address_master_server>
+
+Разрешить службу dns:
+# firewall-cmd --permanent --add-service=dns
+# firewall-cmd --reload
+
+Проверка и включение:
+# named-checkonf
+# systemctl enable --now named
+
+#################################  DNS Server (CentOS) #################################
+                                    slave (подчинённый)
+
+# dnf install -y bind
+
+# vim /etc/named.conf
+    allow-query { any; };
+    allow-transfer  { none; };  
+    recursion yes;
+
+    dnssec-enable yes;
+    dnssec-validation yes;
+
+    #зона прямого просмотра
+    zone "test.local" IN {
+        type slave;
+        file "slaves/test.local";
+        masters { ip_address_master_server};
+    }
+
+    #зона обратного просмотра (x.x.x - сеть)
+    zone "x.x.x.in-addr.arpa" IN {
+        type slave;
+        file "slaves/x.x.x.in-addr.arpa";
+        masters { ip_address_master_server};
+    }
+
+Настроить resolv:
+# vim /etc/resolv.conf
+    nameserver <ip_address_master_server>
+    nameserver <ip_address_slave_server>
+
+Разрешить службу dns:
+# firewall-cmd --permanent --add-service=dns
+# firewall-cmd --reload
+
+Проверка и включение:
+# named-checkonf
+# systemctl enable --now named
+# ll /var/named/slaves 

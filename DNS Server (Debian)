@@ -1,0 +1,70 @@
+#################################  DNS Server (Debian) #################################
+
+# apt-get install -y bind9
+
+Редактирование файла "named.conf.options":
+# vim /etc/bind/named.conf.options
+    options {
+        directory "/var/cache/bind";
+        dnssec-validation no;
+        listen-on-v6 { any; };
+    };
+
+Редактирование файла "named.conf.defalt-zones":
+    #зона прямого просмотра
+    zone "test.local" {
+        type master;
+        file "/var/dns/test.local.db";
+        allow-update { any; };
+    };
+
+    #зона обратного просмотра (x.x.x - сеть)
+    zone "x.x.x.in-addr.arpa" {
+        type master;
+        file "x.x.x.in-addr.arpa.db";
+    };
+
+Проверка:
+# named-checkconf   (при правильном - вывод пуст)
+
+Создание директорий для файлов прямого/обратного просмотра и комирование шаблонов:
+# mkdir /var/dns
+# cp /etc/bind/db.local /var/dns/test.local.db
+# cp /etc/bind/db.127 /var/dns/x.x.x.in-addr.arpa.db
+
+Изменение файла зоны прямого просмотра:
+# vim /var/dns/test.local.db
+@   IN  SOA dns1.test.local.    root.test.local.
+
+        #заполнение
+@   IN  NS  dns1.test.local.
+@   IN  A   <ip_address dns1.test.local>
+SRV IN  A   <ip_address>
+SRV1    IN  A   <ip_address>
+... ... ... ...
+
+Изменение файла зоны обратного просмотра:
+# vim /var/dns/x.x.x.in-addr.arpa.db
+@   IN  SOA dns1.test.local.    root.test.local.
+
+        #заполнение
+    IN  NS      dns1.test.local.
+88      IN  PTR     dns1.test.local.
+94      IN  PTR     SRV.test.local.
+97      IN  PTR     SRV1.test.local.
+...     ... ... ...
+
+Добавление прав на папку "/var/dns"
+# vim /etc/apparmor.d/usr.sbin.named
+...
+/etc/bind/** r ,
+/var/dns/** rw,
+...
+
+# service apparmor restart
+
+Настроить resolv:
+# vim /etc/resolv.conf
+    nameserver <ip_address_server>
+
+# systemctl restart bind9

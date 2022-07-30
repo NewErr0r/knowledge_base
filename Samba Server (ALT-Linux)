@@ -1,0 +1,36 @@
+#################################  Samba Server (ALT) #################################
+
+# apt-get install samba -y
+
+Создание резервной копии файла "smb.conf":
+# cp /etc/samba/smb.conf /etc/samba/smb.conf.origin
+
+Создание общей дирректории и выдача прав на неё:
+# mkdir -p /opt/share/samba
+# chmod 777 /opt/share/samba
+
+Редактирование конфигурационного файла "smb.conf":
+# vim /etc/samba/cmb.conf
+[global]
+dos charset = CP866
+unix charset = utf8
+display charset = cp1251
+workgroup = WORKGROUP 
+server string = Filestore
+security = USER 
+map to guest = Bad User
+
+[Public]
+path = /opt/share/samba
+read only = Yes
+guest ok = Yes
+browseable = yes
+writable = yes
+create mask = 0777
+force create mask = 0777
+directory mask = 0777
+
+# service smb restart
+# service nmb restart
+# systemctl enable smb.service
+# systemctl enable nmb.service

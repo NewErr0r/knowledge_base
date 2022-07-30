@@ -1,0 +1,104 @@
+################################# Установка NGINX #################################
+
+# dnf install nginx -y
+
+# firewall-cmd --permanent --add-service=http
+# firewall-cmd --reload
+
+# systemctl enable --now nginx
+
+P.S. 
+каталог контента: /usr/share/nginx/html (CentOS)
+                  /var/www/html (Debian)
+
+###################################################################################
+
+################################# load balancer (CentoS) ###################################
+
+# vim /etc/nginx/nginx.conf 
+    http    {
+        upstream backend {
+            least_conn;
+            server  <ip_address>;
+            server  <ip_address>;
+            server  <ip_address> backup;    #сервер будет находиться в резерве
+        }
+
+        server  {
+            location / {
+                proxy_pass  http://backend;
+            }
+        }
+    }
+
+# systemctl restart nginx
+
+Разрешение для SELinux
+# setsebool -P httpd_can_network_connect 1
+
+###################################################################################
+
+
+################################# TLS-шифрование  #################################
+
+# firewall-cmd --permanent --add-service=https
+# firewall-cmd --reload
+
+Генерация частного ключа:
+# openssl genpkey -algorithm rsa -pkeyopt rsa_keygen_bits:2048 -out key01.key
+
+Создание запроса на основе частного ключа:
+# openssl req -new -key key01.key -out key01.csr
+
+Подпись самозаверенного сертификата:
+# openssl x509 -req -days 365 -in key01.csr -signkey key01.key -out key01.crt
+
+Копирование сертификатов в каталог по умолчанию:
+# cp key01.key /etc/pki/tls/private/
+# cp key01.crt /etc/pki/tls/certs/
+
+Настройка NGINX:
+# vim /etc/nginx/nginx.conf
+    http    {
+        ...
+        server  {
+            listen  443 ssl httpd2  default_server;
+
+            ssl_certificate '/etc/pki/tls/certs/key01.crt';
+            ssl_certificate_key '/etc/pki/tls/private/key01.key';
+        
+        #настройка редиректа с http на https
+        if ($scheme = 'http') {
+            return 301 https://$host$request_uri;
+        }
+        }
+    }
+
+# systemctl restart nginx
+# ss -tulpn | grep nginx        #проверка прослушиваемых портов NGINX
+
+###################################################################################
+
+################################# NGINX Reverse Proxy (Debian) ###################################
+
+Отключить хост по умолчанию:
+# unlink /etc/nginx/sites-enabled/default
+
+Создать файл конфигурации обратного прокси:
+# vim /etc/nginx/sites-avaible/reverse-proxy.conf
+
+    server {
+        listen  80;
+        location    /   {
+            proxy_pass http://<ip_address>;
+        }
+    }
+
+# nginx -t 
+
+Создать символическую ссылку:
+# ln -s /etc/nginx/sites-avaible/reverse-proxy.conf /etc/nginx/sites-enabled/reverse-proxy.conf
+
+# systemctl restart nginx
+
+#################################################################################################

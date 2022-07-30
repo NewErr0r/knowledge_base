@@ -1,0 +1,32 @@
+#################################  Samba Server (CentOS) #################################
+
+# dnf install samba samba-common samba-client
+
+Создание резервной копии файла "smb.conf":
+# cp /etc/samba/smb.conf /etc/samba/smb.conf.origin
+
+Создание общей дирректории и выдача прав на неё:
+# mkdir -P /srv/samba/anonymous
+# chmod -R 0777 /srv/samba/anonymous
+
+Редактирование конфигурационного файла "smb.conf":
+# vim /etc/samba/cmb.conf
+...
+[Share]
+name_share: "Share"          #имя общей папки, которое увидят пользователи, подключившись к серверу
+comment: "Public Folder"     #свой комментарий для удобства.
+path: "/data/public"         #путь на сервере, где будут храниться данные.
+public: "yes"                #для общего доступа. Установите в yes, если хотите, чтобы все могли работать с ресурсом.
+writable: "yes"              #разрешает запись в сетевую папку.
+read_only: "no"              #только для чтения. Установите no, если у пользователей должна быть возможность создавать папки и файлы.
+guest_ok: "yes"              #разрешает доступ к папке гостевой учетной записи.
+create_mask: "0777"          #
+directory_mask: "0777"       #####при создании новой папки или файла назначаются указанные права.
+force_create_mode: "0777"    ###
+force_directory_mode: "0777" #
+
+# firewall-cmd --permanent --add-service=samba
+# firewall-cmd --reload
+
+# systemctl enable --now smb
+# systemctl enable --now nmb
