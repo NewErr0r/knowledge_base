@@ -1,0 +1,19 @@
+#################################  NFS Client #################################
+
+# apt-get install nfs-common nfs4-acl-tools
+
+Проверка монтируемой файловой системы:
+# showmount -e <ip_address_nfs_server>
+
+Создать дирректорию для монтируемой файловой системы:
+# mkdir -p /mnt/adminshare
+# chmod 777 /mnt/adminshare
+
+Примонтировать файловую систему:
+# mount -t nfs <ip_address>:/opt/share /mnt/adminshare
+
+Авто примонтирование при включении ОС:
+# echo "<ip_address>:/opt/share /mnt/adminshare nfs defaults 0 0" >> /etc/fstab
+
+
+# mount | grep nfs

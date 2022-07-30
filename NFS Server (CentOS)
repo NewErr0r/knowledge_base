@@ -1,0 +1,20 @@
+#################################  NFS Server (CentOS) #################################
+
+# dnf install -y nfs-utils
+# systemctl enable --now nfs-server 
+
+Создать файовую систему для экспорта:
+# mkdir -p /opt/share
+# chmod 777 /opt/share
+
+Редактировать файл "exports"
+# vim /etc/exports
+/opt/share  <network/mask>(rw,sync)
+
+Экспорт файловой системы:
+# exportfs -arv
+
+# firewall-cmd --permanent --add-service=nfs
+# firewall-cmd --permanent --add-service=rpc-bind
+# firewall-cmd --permanent --add-service=mountd
+# firewall-cmd --reload

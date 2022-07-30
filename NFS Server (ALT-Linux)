@@ -1,0 +1,15 @@
+#################################  NFS Server (ALT) #################################
+
+# apt-get install -y nfs-server nfs-utils
+# systemctl start nfs-server 
+# systemctl enable nfs-server 
+
+Создать файовую систему для экспорта:
+# mkdir -p /opt/share
+# chmod 777 /opt/share
+
+Редактировать файл "exports"
+# vim /etc/exports
+/opt/share  <network/mask>(rw,no_root_squash)
+
+# systemctl restart nfs-server
