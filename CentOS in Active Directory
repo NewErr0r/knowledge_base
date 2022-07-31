@@ -7,7 +7,7 @@
 # realm discover test.local
 
 Присоединение к домену:
-# realm join test.local -U -v test.local Administrator
+# realm join test.local -U -v Administrator
 
 Проверка:
 # realm list

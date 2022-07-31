@@ -1,0 +1,29 @@
+#################### Ubuntu ввод в домен Active Directory ################
+
+Установка и настройка Samba:
+# apt-get install -y samba cifs-utils smbclient libpam-winbind
+# sudo nano /etc/samba/smb.conf
+    [global]
+        workgroup = TEST
+        security = user
+
+Установка и настройка Kerberos:
+# apt-get install -y krb5-user sssd-krb5
+    1. TEST.LOCAL
+    2. <ip_address_server>
+    3. <ip_address_server>
+
+P.S. Если ошибки, то 
+# sudo dpkg-reconfigure krb5-config
+
+Установка SSSD:
+# apt-get install -y sssd-ad sssd-tools realm adcli
+
+Обнаруение домена:
+# realm -v discover test.local
+
+Присоединение к домену:
+# realm join  -U -v Administrator@TEST.LOCAL TEST.LOCAL
+
+Проверка:
+# realm list
