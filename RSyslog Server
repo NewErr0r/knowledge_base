@@ -1,0 +1,37 @@
+#################################  RSyslog Server (CentOS) #################################
+
+# systemctl enable --now rsyslog 
+
+Редактирование конфигурационного файла:
+#  vim /etc/rsyslog.conf 
+    # раскомментировать строки
+    module (load = 'imudp')
+    input (type = 'imudp' port = '514')
+
+    module (load = 'imtcp')
+    input (type = 'imtcp' port = '514')
+
+# задать шаблон 
+$template RemoteLogs,"/var/log/%HOSTNAME%/%PROGRAMNAME%.log"
+*.* ?RemoteLogs
+
+# systemctl restart rsyslog
+
+Проверка работы сетевых сокетов:
+# netstat -tulpn | grep rsyslog
+
+Разрешения для SELinux:
+# semanage port -m -t syslog_port_t -p udp 514
+# semanage port -m -t syslog_port_t -p tcp 514
+
+# firewall-cmd --permanent --add-port=514/udp
+# firewall-cmd --permanent --add-port=514/tcp
+# firewall-cmd --reload
+
+#################################  RSyslog Clients #################################
+
+Создание файлов и отпраление лого на сервер:
+# vim /etc/syslog.d/all.conf
+*.* @@<ip_address>:514  
+
+# systemctl enable --now rsyslog
