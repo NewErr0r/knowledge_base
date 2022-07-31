@@ -1,0 +1,13 @@
+#################### CentOS ввод в домен Active Directory ################
+
+Установка необходимых пакетов:
+# dnf install -y realmd sssd oddjob oddjob-mkhomedir adcli samba-common samba-common-tools krb5-workstation authselect-compat
+
+Обнаруение домена:
+# realm discover test.local
+
+Присоединение к домену:
+# realm join test.local -U -v test.local Administrator
+
+Проверка:
+# realm list
