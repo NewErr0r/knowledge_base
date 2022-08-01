@@ -78,6 +78,21 @@ comp-lzo no
 # systemctl start openvpn-server@server
 # systemctl status openvpn-server@server
 
+################ Настройка доступа к локальной сети клиентам OpenVPN в Linux ########################################
+
+# vim /etc/openvpn/server/server.conf
+push "route 172.16.10.0 255.255.255.0"
+push "route 192.168.2.0 255.255.255.0"
+_______
+* где 172.16.10.0 — VPN сеть; 192.168.2.0 — локальная сеть, в которую необходимо «попасть» пользователям openvpn
+_______
+push "dhcp-option DNS 192.168.0.15"
+push "dhcp-option DNS 192.168.0.16"
+push "dhcp-option DOMAIN test.local"
+_______
+* где 192.168.0.15 и 192.168.0.16 — внутренние DNS-серверы; test.local — домен, котоый будет добавляться к узлам, обращение к которым идет по неполному имени
+_______
+
 
 ################# Настройка OpenVPN-клиента ###########################
 
