@@ -1,0 +1,130 @@
+#################### OpenVPN Server (CentOS) ##########################
+
+Настройка SELinux:
+# setenforce 0
+# vim /etc/selinux/config
+...
+SELINUX=disabled
+...
+
+Настройка брандмауэра:
+# firewall-cmd --permanent --add-port=443/udp
+# firewall-cmd --reload
+
+Установка и создание сертификатов:
+# dnf install epel-release
+# dnf install openvpn easy-rsa
+
+Создание сертификатов:
+# cd /usr/share/easy-rsa/3
+# vim vars
+export KEY_COUNTRY="RU"
+export KEY_PROVINCE="Sankt-Petersburg"
+export KEY_CITY="Sankt-Petersburg"
+export KEY_ORG="TEST LOCAL"
+export KEY_EMAIL="admin@test.local"
+export KEY_CN="TEST"
+export KEY_OU="TEST"
+export KEY_NAME="name-openvpn-server.test.local"
+export KEY_ALTNAMES="name-openvpn-server"
+
+Запускаем созданный файл на исполнение:
+# . ./vars
+
+Генерация ключей:
+# ./easyrsa init-pki
+# ./easyrsa build-ca
+# ./easyrsa gen-dh
+# ./easyrsa gen-req vpn-server nopass
+# ./easyrsa sign-req server vpn-server
+# openvpn --genkey --secret pki/ta.key
+
+Создаем каталог в /etc/openvpn, в котором будем хранить сертификаты:
+# mkdir -p /etc/openvpn/server/keys
+# cd pki
+# cp ca.crt issued/vpn-server.crt private/vpn-server.key dh.pem ta.key /etc/openvpn/server/keys/
+
+Настройка и запуск сервера:
+# vim /etc/openvpn/server/server.conf
+local <ip_address>
+port 443
+proto udp
+dev tun
+ca keys/ca.crt
+cert keys/vpn-server.crt
+key keys/vpn-server.key
+dh keys/dh.pem
+tls-auth keys/ta.key 0
+server <network/mask_vpn>
+ifconfig-pool-persist ipp.txt
+keepalive 10 120
+max-clients 32
+persist-key
+persist-tun
+status /var/log/openvpn/openvpn-status.log
+log-append /var/log/openvpn/openvpn.log
+verb 0
+mute 20
+daemon
+mode server
+tls-server
+comp-lzo no
+
+Создаем каталог для логов сервера:
+# mkdir /var/log/openvpn
+
+
+# systemctl enable openvpn-server@server
+# systemctl start openvpn-server@server
+# systemctl status openvpn-server@server
+
+
+################# Настройка OpenVPN-клиента ###########################
+
+Создание сертификатов:
+# cd /usr/share/easy-rsa/3
+# . ./vars
+# ./easyrsa gen-req client1 nopass
+# ./easyrsa sign-req client client1
+
+На сервере скопируем ключи во временную директорию:
+# mkdir /tmp/keys
+# cp pki/issued/client1.crt pki/private/client1.key pki/dh.pem pki/ca.crt pki/ta.key /tmp/keys
+# chmod -R a+r /tmp/keys
+
+Устанавливаем клиента:
+# yum install epel-release
+# yum install openvpn
+
+# apt-get install openvpn
+
+Создаем каталог:
+# mkdir /etc/openvpn/client
+# cd /etc/openvpn/client
+
+Копируем в каталог файлы ca.crt, client1.crt, client1.key, dh.pem, ta.key из каталога /tmp/keys на сервере:
+# scp admin@192.168.0.15:/tmp/keys/* .
+# chmod 600 client1.key ta.key
+
+Создаем конфигурационный файл:
+# vim /etc/openvpn/client/client.conf
+client
+resolv-retry infinite
+nobind
+remote <ip_address_server> 443
+proto udp
+dev tun
+comp-lzo no
+ca ca.crt
+cert client1.crt
+key client1.key
+dh dh.pem
+tls-client
+tls-auth ta.key 1
+float
+keepalive 10 120
+persist-key
+persist-tun
+verb 0
+
+# systemctl enable openvpn-client@client --now
