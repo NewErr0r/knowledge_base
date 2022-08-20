@@ -1,0 +1,27 @@
+1. Установка:
+# https://www.postgresql.org/download/
+
+2. Настройка общего доступа к postgresql:
+# vi /etc/postgresql/<№_version>/main/postgresql.conf
+
+    listen_address = '*'    # Разрешает подключение с любых адресов
+
+# systemctl restatrt postgresql
+
+3. Вход в postgresql под пользователем postgres:
+
+# su postgres
+# psql
+# \L    (просмотр list of databases)
+
+# CREATE DATABASES test_db;                                         (создание базы данных "test_db")
+# CREATE USER test_user WITH ENCRYPTED PASSWORD 'P@ssw0rd';         (Создание пользователя "test_user" с паролем "P@ssw0rd")
+# GRANT ALL PRIVILEGES ON DATABASE test_db TO test_user;            (Выдача максимальных привилегий)
+# ALTER DATABASE test_db OWNER TO test_user;                        (Смена владельца раздела)
+
+4. Разрешения и условия для подключения к внутренним ресурсам:
+# vi /etc/postgresql/<№_version>/pg_hba.conf
+
+    host    all     all     <networl/mask>      md5 
+
+# systemctl restart postgresql
