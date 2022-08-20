@@ -1,0 +1,45 @@
+####################### CentOS ########################################
+
+1. Создать скрипт, который будет поднимать GRE туннель при загрузки ОС:
+# vi /etc/gre.up
+    #!/bin/bash
+    ip tunnel add tun1 mode gre local <ip_local> remote <ip_remote> ttl 255
+    ip link set tun1 up 
+    ip addr add <ip_address_tunnel/mask> dev tun1 
+    
+2. Задать права на исполнение:
+# chmod +x /etc/gre.up
+
+3. Добавление скрипта в автозагрузку:
+# vi /etc/crontab
+    @reboot root /etc/gre.up
+
+4. Разрешения для Firewalld: (если включён)
+# firewalld-cmd --permanent --add-protocol=gre
+# firewalld-cmd --permanent --add-rrotocol=esp
+# firewalld-cmd --permanent --add-port=47/tcp
+
+#########################################################################
+
+####################### Debian ########################################
+
+1. Создать скрипт, который будет поднимать GRE туннель при загрузки ОС:
+# vi /etc/gre.up
+    #!/bin/bash
+    ip tunnel add tun1 mode gre local <ip_local> remote <ip_remote> ttl 255
+    ip link set tun1 up 
+    ip addr add <ip_address_tunnel/mask> dev tun1 
+    
+2. Задать права на исполнение:
+# chmod +x /etc/gre.up
+
+3. Добавление скрипта в автозагрузку:
+# vi /etc/network/interfaces
+    post-up /etc/gre.up
+
+4. Разрешения для iptables: (если включён)
+# iptables -A INPUT -p 47 -i <внешний_интерфейс> -j ACCEPT
+# iptables -A INPUT -p esp -i <внешний_интерфейс> -j ACCEPT
+# iptables-save
+
+#########################################################################
