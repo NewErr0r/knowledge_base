@@ -1,4 +1,4 @@
-#################################  NFS Server (ALT) #################################
+#################################  NFS Server (ALT) ##################################
 
 # apt-get install -y nfs-server nfs-utils
 # systemctl start nfs-server 
