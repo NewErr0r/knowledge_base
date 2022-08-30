@@ -1,4 +1,4 @@
-#################################  NFS Server (CentOS) #################################
+#################################  NFS Server (CentOS) ##################################
 
 # dnf install -y nfs-utils
 # systemctl enable --now nfs-server 
