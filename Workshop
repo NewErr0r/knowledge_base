@@ -1,0 +1,47 @@
+#################### Базовая конфигурация: ##############################
+
+Варианты смены имени хоста:
+    # hostnamectl set-hostname <name>
+
+    # echo '<name>' > /etc/hostname
+
+    # vi /etc/hostname
+        <name>
+
+#################### Конфигурация сетевой инфраструктуры: ##############################
+
+Адреса должны быть в соответствии с топологией:
+
+    # vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+        TYPE=Ethernet
+        BOOTPROTO=static
+        NAME=enp0s3 
+        ONBOOT=yes
+        IPADDR=<ip_address>
+        NETMASK=<netmask>
+        DNS1=<ip_address_dns1>
+        DNS2=<ip_address_dns2>
+        GATEWAY=<ip_default-gateway>
+        DOMAIN=<name_domain>
+        DEVICE=enp0s3
+
+    # systemctl restart NetworkManager.service
+
+################ Сетевая связность (1-2) #############################################
+
+Включение маршрутизации:
+    # echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+    # sysctl -p
+
+Добавление маршрутов:
+    # vi /etc/rc.local
+        ip route add <network/mask> via <next_hop_address>
+        ...
+    # chmod +x /etc/rc.local
+    # systemctl restart rc-local
+    # ip route
+
+Настрайка NAT:
+    # firewall-cmd --permanent --add-interface=<name> --zone=trusted
+    # firewall-cmd --permanent --add-masquerade --zone=public
+    # firewall-cmd --reload
