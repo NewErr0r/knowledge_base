@@ -8,6 +8,9 @@
     # vi /etc/hostname
         <name>
 
+    Windows:
+    # Rename-Computer -NewName <name>
+
 ####################### Конфигурация сетевой инфраструктуры: ##############################
 
 Адреса должны быть в соответствии с топологией:
@@ -45,3 +48,17 @@
     # firewall-cmd --permanent --add-interface=<name> --zone=trusted
     # firewall-cmd --permanent --add-masquerade --zone=public
     # firewall-cmd --reload
+
+GRE-Tunnel:
+    # vi /etc/gre.up
+        #!/bin/bash
+        ip tunnel add tun1 mode gre local <ip_local> remote <ip_remote> ttl 255
+        ip link set tun1 up 
+        ip addr add <ip_address_tunnel/mask> dev tun1 
+    # chmod +x /etc/gre.up
+    # vi /etc/crontab
+        @reboot root /etc/gre.up
+
+    # firewalld-cmd --permanent --add-protocol=gre
+    # firewalld-cmd --permanent --add-rrotocol=esp
+    # firewalld-cmd --permanent --add-port=47/tcp
