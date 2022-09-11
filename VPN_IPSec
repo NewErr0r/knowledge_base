@@ -1,0 +1,50 @@
+#################### VPN_on_IPSec ######################
+
+Включение пересылки пакетов в ядре:
+# echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+# sysctl -p
+
+
+Установка StrongSwan:
+# dnf install -y epel-release
+# dnf install -y strongswan 
+# systemctl enable --now strongswan-starter
+
+Настройка шлюзов безопасности: (Зеркально с двух сторон!!!)
+# cp /etc/strongswan/ipsec.conf /etc/strongswan/ipsec.conf.orig
+# vi /etc/strongswan/ipsec.conf
+    config setup
+        charondebug="all"
+        uniqueids=yes
+        strictcrlpolicy=no
+
+     conn cloud-to-hq
+        authby=secret
+        left=%defaultroute
+        leftid=<public_ip_address>
+        leftsubnet=<local_subnet/mask>
+        right=<remote_public_ip>
+        rightsubnet=<remote_local_subnet/mask>
+        ike=aes256-sha2_256-modp1024!
+        esp=aes256-sha2_256!
+        keyingtries=0
+        ikelifetime=1h
+        lifetime=8h
+        dpddelay=30
+        dpdtimeout=120
+        dpdaction=restart
+        auto=start
+
+# vi /etc/strongswan/ipsec.secrets
+    <public_ip_address> <remote_public_ip> : PSK "<password>"     # Одинаков с двух сторон!
+ 
+# systemctl restart strongswan-starter
+
+Указать маршруты, чтобы доступ в локальную сеть шёл по защищённому каналу
+Проверка: 
+# strongswan status
+Примерный вывод: 
+Security Associations (1 up, 0 connecting):
+    hq-to-cloud[3]: ESTABLISHED 29 minutes ago, 10.60.1.15[51.250.80.88]...10.128.0.33[51.250.68.202]
+    hq-to-cloud{3}:  INSTALLED, TUNNEL, reqid 3, ESP in UDP SPIs: c7fa371d_i ce8b91ad_o
+    hq-to-cloud{3}:   10.60.1.0/24 === 10.128.0.0/24
