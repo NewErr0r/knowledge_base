@@ -1,4 +1,4 @@
-#################### Ubuntu ввод в домен Active Directory ################
+#################### Ubuntu ввод в домен Active Directory #################
 
 Установка и настройка Samba:
 # apt-get install -y samba cifs-utils smbclient libpam-winbind
