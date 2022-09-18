@@ -1,64 +1,24 @@
 #################### Базовая конфигурация: ##############################
 
 Имена хостов в созданных ВМ должны быть установлены в соответствии со схемой:
-    # hostnamectl set-hostname <name>
 
-    # echo '<name>' > /etc/hostname
+ISP:
+# hostnamectl set-hostname ISP
 
-    # vi /etc/hostname
-        <name>
+RTR-L:
+# hostnamectl set-hostname RTR-L
 
-    Windows:
-    # Rename-Computer -NewName <name>
+RTR-R:
+# hostnamectl set-hostname RTR-R
 
-####################### Конфигурация сетевой инфраструктуры: ##############################
+SRV:
+# hostnamectl set-hostname SRV
 
-Адреса должны быть в соответствии с топологией:
+WEB-L:
+# hostnamectl set-hostname WEB-L
 
-    # vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
-        TYPE=Ethernet
-        BOOTPROTO=static
-        NAME=enp0s3 
-        ONBOOT=yes
-        IPADDR=<ip_address>
-        NETMASK=<netmask>
-        DNS1=<ip_address_dns1>
-        DNS2=<ip_address_dns2>
-        GATEWAY=<ip_default-gateway>
-        DOMAIN=<name_domain>
-        DEVICE=enp0s3
+WEB-R:
+# hostnamectl set-hostname WEB-R
 
-    # systemctl restart NetworkManager.service
-
-##################### Сетевая связность (1-2) #############################################
-
-Сети, подключенные к ISP, считаются внешними:
-    # echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
-    # sysctl -p
-
-Добавление маршрутов:
-    # vi /etc/rc.local
-        ip route add <network/mask> via <next_hop_address>
-        ...
-    # chmod +x /etc/rc.local
-    # systemctl restart rc-local
-    # ip route
-
-Платформы контроля трафика, установленные на границах регионов, должны выполнять трансляцию трафика, идущего из соответствующих внутренних сетей во внешние сети стенда и в сеть Интернет:
-    # firewall-cmd --permanent --add-interface=<name> --zone=trusted
-    # firewall-cmd --permanent --add-masquerade --zone=public
-    # firewall-cmd --reload
-
-GRE-Tunnel:
-    # vi /etc/gre.up
-        #!/bin/bash
-        ip tunnel add tun1 mode gre local <ip_local> remote <ip_remote> ttl 255
-        ip link set tun1 up 
-        ip addr add <ip_address_tunnel/mask> dev tun1 
-    # chmod +x /etc/gre.up
-    # vi /etc/crontab
-        @reboot root /etc/gre.up
-
-    # firewalld-cmd --permanent --add-protocol=gre
-    # firewalld-cmd --permanent --add-rrotocol=esp
-    # firewalld-cmd --permanent --add-port=47/tcp
+CLI:
+# hostnamectl set-hostname CLI
