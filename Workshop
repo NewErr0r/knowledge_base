@@ -149,6 +149,14 @@ ISP:
 # echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 # sysctl -p
 
+RTR-L:
+# echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+# sysctl -p
+
+RTR-R:
+# echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+# sysctl -p
+
 2. Платформы контроля трафика, установленные на границах регионов, должны выполнять трансляцию трафика, идущего из соответствующих внутренних сетей во внешние сети стенда и в сеть Интернет:
 
 ISP:
@@ -209,3 +217,57 @@ ip route add 192.168.100.0/24 via 172.16.1.1
 # firewall-cmd --permanent --add-protocol=esp
 # firewall-cmd --permanent --add-port=47/tcp
 # firewall-cmd --reload
+
+3. Между платформами должен быть установлен защищенный туннель, позволяющий осуществлять связь между регионами с применением внутренних адресов:
+
+RTR-L:
+# dnf install -y epel-release
+# dnf install -y strongswan
+# systemctl enable --now strongswan
+# systemctl enable --now strongswan-starter
+# vi /etc/strongswan/ipsec.conf
+    config setup
+        charondebug="all"
+        uniqueids=yes
+        strictcrlpolicy=no
+
+     conn gre
+        type=tunnel
+        authby=secret
+        left=172.16.1.1
+        right=172.16.1.2
+        leftprotoport=gre
+        rightprotoport=gre
+        ike=aes256-sha2_256-modp1024!
+        esp=aes256-sha2_256!
+        auto=start
+        pfs=no
+
+# vi /etc/strongswan/ipsec.secret
+172.16.1.1  172.16.1.2  : PSK "P@ssw0rd"
+
+RTR-R:
+# dnf install -y epel-release
+# dnf install -y strongswan
+# systemctl enable --now strongswan
+# systemctl enable --now strongswan-starter
+# vi /etc/strongswan/ipsec.conf
+    config setup
+        charondebug="all"
+        uniqueids=yes
+        strictcrlpolicy=no
+
+     conn gre
+        type=tunnel
+        authby=secret
+        left=172.16.1.2
+        right=172.16.1.1
+        leftprotoport=gre
+        rightprotoport=gre
+        ike=aes256-sha2_256-modp1024!
+        esp=aes256-sha2_256!
+        auto=start
+        pfs=no
+
+# vi /etc/strongswan/ipsec.secret
+172.16.1.2  172.16.1.1  : PSK "P@ssw0rd"
