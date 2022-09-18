@@ -1,6 +1,4 @@
-#################### Базовая конфигурация: ##############################
-
-Имена хостов в созданных ВМ должны быть установлены в соответствии со схемой:
+1. Имена хостов в созданных ВМ должны быть установлены в соответствии со схемой:
 
 ISP:
 # hostnamectl set-hostname ISP
@@ -22,3 +20,115 @@ WEB-R:
 
 CLI:
 # hostnamectl set-hostname CLI
+
+2. Адресация должна быть выполнена в соответствии с Таблицей 1:
+
+ISP: 
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s8
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=enp0s8
+ONBOOT=yes
+IPADDR=4.4.4.1
+NETMASK=255.255.255.0
+DEVICE=enp0s8
+
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s9
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=enp0s9
+ONBOOT=yes
+IPADDR=5.5.5.1
+NETMASK=255.255.255.0
+DEVICE=enp0s9
+
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s10
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=enp0s10
+ONBOOT=yes
+IPADDR=3.3.3.1
+NETMASK=255.255.255.0
+DEVICE=enp0s10
+
+#systemctl restart NetworkManagers
+
+
+RTR-L:
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=enp0s3
+ONBOOT=yes
+IPADDR=4.4.4.100
+NETMASK=255.255.255.0
+GATEWAY=4.4.4.1
+DNS1=4.4.4.1
+DEVICE=enp0s3
+
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s8
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=enp0s8
+ONBOOT=yes
+IPADDR=192.168.100.254
+NETMASK=255.255.255.0
+DEVICE=enp0s8
+
+RTR-R:
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=enp0s3
+ONBOOT=yes
+IPADDR=5.5.5.100
+NETMASK=255.255.255.0
+GATEWAY=5.5.5.1
+DNS1=5.5.5.1
+DEVICE=enp0s3
+
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s8
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=enp0s8
+ONBOOT=yes
+IPADDR=172.16.100.254
+NETMASK=255.255.255.0
+DEVICE=enp0s8
+
+SRV:
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=enp0s3
+ONBOOT=yes
+IPADDR=192.168.100.200
+NETMASK=255.255.255.0
+GATEWAY=192.168.100.254
+DNS1=192.168.100.200
+DNS2=4.4.4.1
+DEVICE=enp0s3
+
+WEB-L:
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=enp0s3
+ONBOOT=yes
+IPADDR=192.168.100.100
+NETMASK=255.255.255.0
+GATEWAY=192.168.100.254
+DNS1=192.168.100.200
+DEVICE=enp0s3
+
+WEB-R:
+# vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=enp0s3
+ONBOOT=yes
+IPADDR=172.16.100.100
+NETMASK=255.255.255.0
+GATEWAY=172.16.100.254
+DNS1=192.168.100.200
+DEVICE=enp0s3
