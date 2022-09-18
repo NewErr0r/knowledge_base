@@ -75,6 +75,8 @@ IPADDR=192.168.100.254
 NETMASK=255.255.255.0
 DEVICE=enp0s8
 
+#systemctl restart NetworkManagers
+
 RTR-R:
 # vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
 TYPE=Ethernet
@@ -96,6 +98,8 @@ IPADDR=172.16.100.254
 NETMASK=255.255.255.0
 DEVICE=enp0s8
 
+#systemctl restart NetworkManagers
+
 SRV:
 # vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
 TYPE=Ethernet
@@ -109,6 +113,8 @@ DNS1=192.168.100.200
 DNS2=4.4.4.1
 DEVICE=enp0s3
 
+#systemctl restart NetworkManagers
+
 WEB-L:
 # vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
 TYPE=Ethernet
@@ -121,6 +127,8 @@ GATEWAY=192.168.100.254
 DNS1=192.168.100.200
 DEVICE=enp0s3
 
+#systemctl restart NetworkManagers
+
 WEB-R:
 # vi /etc/sysconfig/network-scripts/ifcfg-enp0s3
 TYPE=Ethernet
@@ -132,3 +140,28 @@ NETMASK=255.255.255.0
 GATEWAY=172.16.100.254
 DNS1=192.168.100.200
 DEVICE=enp0s3
+
+#systemctl restart NetworkManagers
+
+1. Сети, подключенные к ISP, считаются внешними:
+ISP:
+# echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+# sysctl -p
+
+2. Платформы контроля трафика, установленные на границах регионов, должны выполнять трансляцию трафика, идущего из соответствующих внутренних сетей во внешние сети стенда и в сеть Интернет:
+ISP:
+# firewall-cmd --permanent --zone=trusted --add-interface=enp0s8
+# firewall-cmd --permanent --zone=trusted --add-interface=enp0s9
+# firewall-cmd --permanent --zone=trusted --add-interface=enp0s10
+# firewall-cmd --permanent --add-masquerade 
+# firewall-cmd --reload
+
+RTR-L:
+# firewall-cmd --permanent --zone=trusted --add-interface=enp0s8
+# firewall-cmd --permanent --add-masquerade 
+# firewall-cmd --reload
+
+RTR-R:
+# firewall-cmd --permanent --zone=trusted --add-interface=enp0s8
+# firewall-cmd --permanent --add-masquerade 
+# firewall-cmd --reload
