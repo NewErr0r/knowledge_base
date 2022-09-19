@@ -311,7 +311,7 @@ zone "demo.wsr" IN {
 
 # vi /var/named/demo.wsr
 $TTL 86400
- @   IN  SOA     dns1.infoit.com.ua. root.infoit.com.ua. (
+ @   IN  SOA     demo.wsr root.demo.wsr. (
          2019112201  ;Serial
          3600        ;Refresh
          1800        ;Retry
@@ -324,6 +324,84 @@ www IN  A   4.4.4.100
 www IN  A   5.5.5.100
 internet    CNAME   isp.demo.wsr.
 rtr-l   IN  A   4.4.4.100
+
+# firewall-cmd --permanent --add-service=dns
+# firewall-cmd --reload
+# systemctl enable --now named.service
+
+2. Выполните настройку второго уровня DNS-системы стенда:
+SRV:
+# dnf install -y epel-release
+# dnf install -y bind bind-utils
+# getenforce 
+# vi /etc/named.conf
+...
+listen-on port 53 { any; };
+listen-on-v6 port 53 { any; };
+allow-query     { any; };
+...
+zone "int.demo.wsr" IN {
+    type master;
+    file "int.demo.wsr"
+    allow-update { none; };
+};
+
+zone "100.168.192.in-addr.arpa" IN {
+    type master;
+    file "100.168.192.in-addr.arpa";
+    allow-update { none; };
+};
+
+zone "100.16.172.in-addr.arpa" IN {
+    type master;
+    file "100.16.172.in-addr.arpa";
+    allow-update { none; };
+};
+
+# vi /var/named/int.demo.wsr
+$TTL 86400
+ @   IN  SOA     int.demo.wsr. root.int.demo.wsr. (
+         2019112201  ;Serial
+         3600        ;Refresh
+         1800        ;Retry
+         604800      ;Expire
+         86400       ;Minimum TTL
+)
+        IN  NS  srv.int.demo.wsr.
+srv     IN  A   192.168.100.200
+web-l   IN  A   192.168.100.100
+web-r   IN  A   172.16.100.100
+rtr-l   IN  A   192.168.100.254
+rtr-r   IN  A   172.16.100.254
+ntp     IN  CNAME srv.int.demo.wsr.
+dns     IN  CNAME srv.int.demo.wsr.
+
+# vi /var/named/100.168.192.in-addr.arpa
+$TTL 86400
+ @   IN  SOA     int.demo.wsr. root.int.demo.wsr. (
+         2019112201  ;Serial
+         3600        ;Refresh
+         1800        ;Retry
+         604800      ;Expire
+         86400       ;Minimum TTL
+)
+        IN  NS      srv.int.demo.wsr.
+200     IN  PTR     srv.int.demo.wsr.
+100     IN  PTR     web-l.int.demo.wsr.
+254     IN  PTR     rtr-l.int.demo.wsr.
+
+# vi /var/named/100.16.172.in-addr.arpa
+$TTL 86400
+ @   IN  SOA     int.demo.wsr. root.int.demo.wsr. (
+         2019112201  ;Serial
+         3600        ;Refresh
+         1800        ;Retry
+         604800      ;Expire
+         86400       ;Minimum TTL
+)
+        IN  NS      srv.int.demo.wsr.
+100     IN  PTR     web-r.int.demo.wsr.
+254     IN  PTR     rtr-r.int.demo.wsr.
 
 # firewall-cmd --permanent --add-service=dns
 # firewall-cmd --reload
