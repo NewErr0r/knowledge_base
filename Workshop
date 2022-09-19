@@ -271,3 +271,20 @@ RTR-R:
 
 # vi /etc/strongswan/ipsec.secret
 172.16.1.2  172.16.1.1  : PSK "P@ssw0rd"
+
+4. Платформа управления трафиком RTR-L выполняет контроль входящего трафика согласно следующим правилам:
+
+RTR-L:
+# firewall-cmd --permanent --add-service=dns
+# firewall-cmd --permanent --add-service=http
+# firewall-cmd --permanent --add-service=https
+# firewall-cmd --permanent --add-protocol=icmp
+# firewall-cmd --permanent --add-port=2222/tcp
+
+5. Платформа управления трафиком RTR-R выполняет контроль входящего трафика согласно следующим правилам:
+RTR-R:
+# firewall-cmd --permanent --add-service=dns
+# firewall-cmd --permanent --add-service=http
+# firewall-cmd --permanent --add-service=https
+# firewall-cmd --permanent --add-protocol=icmp
+# firewall-cmd --permanent --add-port=2244/tcp
