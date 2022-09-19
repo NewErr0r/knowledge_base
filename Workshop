@@ -1,3 +1,4 @@
+Виртуальные машины и коммутация.
 1. Имена хостов в созданных ВМ должны быть установлены в соответствии со схемой:
 
 ISP:
@@ -143,6 +144,7 @@ DEVICE=enp0s3
 
 #systemctl restart NetworkManagers
 
+Сетевая связность.
 1. Сети, подключенные к ISP, считаются внешними:
 
 ISP:
@@ -288,3 +290,7 @@ RTR-R:
 # firewall-cmd --permanent --add-service=https
 # firewall-cmd --permanent --add-protocol=icmp
 # firewall-cmd --permanent --add-port=2244/tcp
+
+Инфраструктурные службы.
+1. Выполните настройку первого уровня DNS-системы стенда:
+ISP:
