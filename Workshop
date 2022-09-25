@@ -434,3 +434,29 @@ allow 172.16.100.0/24
 
 # firewall-cmd --permanent --add-service=ntp
 # firewall-cmd --reload
+
+Все внутренние хосты(в том числе и платформы управления
+трафиком) должны синхронизировать свое время с SRV:
+RTR-L:
+# dnf install -y chrony
+# vi /etc/chrony.conf
+server 192.168.100.200
+# systemctl restart chronyd.service
+
+RTR-R:
+# dnf install -y chrony
+# vi /etc/chrony.conf
+server 192.168.100.200
+# systemctl restart chronyd.service
+
+WEB-L:
+# dnf install -y chrony
+# vi /etc/chrony.conf
+server ntp.int.demo.wsr
+# systemctl restart chronyd.service
+
+WEB-R:
+# dnf install -y chrony
+# vi /etc/chrony.conf
+server ntp.int.demo.wsr
+# systemctl restart chronyd.service
