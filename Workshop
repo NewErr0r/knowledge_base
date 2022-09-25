@@ -420,3 +420,17 @@ allow 3.3.3.0/24
 
 # firewall-cmd --permanent --add-service=ntp
 # firewall-cmd --reload
+
+4. Выполните конфигурацию службы второго уровня времени на SRV:
+SRV:
+# dnf install -y chrony
+# vi /etc/chrony.conf
+server 4.4.4.1
+allow 192.168.100.0/24
+allow 172.16.100.0/24
+
+# timedatectl set-ntp true
+# systemctl restart chronyd.service
+
+# firewall-cmd --permanent --add-service=ntp
+# firewall-cmd --reload
