@@ -291,6 +291,16 @@ RTR-R:
 # firewall-cmd --permanent --add-protocol=icmp
 # firewall-cmd --permanent --add-port=2244/tcp
 
+6. Обеспечьте настройку служб SSH региона Left:
+RTR-L:
+# firewall-cmd --permanent --add-forward-port=2222:proto=tcp:toport=22:toaddr=192.168.100.100
+# firewall-cmd --reload
+
+WEB-L:
+# vi /etc/ssh/sshd_config
+PermitRootLogin yes
+# systemctl restatr sshd
+
 Инфраструктурные службы.
 1. Выполните настройку первого уровня DNS-системы стенда:
 ISP:
