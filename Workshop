@@ -301,6 +301,16 @@ WEB-L:
 PermitRootLogin yes
 # systemctl restatr sshd
 
+7. Обеспечьте настройку служб SSH региона Right:
+RTR-L:
+# firewall-cmd --permanent --add-forward-port=2244:proto=tcp:toport=22:toaddr=172.16.100.100
+# firewall-cmd --reload
+
+WEB-L:
+# vi /etc/ssh/sshd_config
+PermitRootLogin yes
+# systemctl restatr sshd
+
 Инфраструктурные службы.
 1. Выполните настройку первого уровня DNS-системы стенда:
 ISP:
