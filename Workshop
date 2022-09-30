@@ -331,7 +331,7 @@ zone "demo.wsr" IN {
 
 # vi /var/named/demo.wsr
 $TTL 86400
- @   IN  SOA     demo.wsr root.demo.wsr. (
+ @   IN  SOA     demo.wsr. root.demo.wsr. (
          2019112201  ;Serial
          3600        ;Refresh
          1800        ;Retry
