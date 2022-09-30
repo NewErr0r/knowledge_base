@@ -293,7 +293,7 @@ RTR-R:
 
 6. Обеспечьте настройку служб SSH региона Left:
 RTR-L:
-# firewall-cmd --permanent --add-forward-port=2222:proto=tcp:toport=22:toaddr=192.168.100.100
+# firewall-cmd --permanent --add-forward-port=port=2222:proto=tcp:toport=22:toaddr=192.168.100.100
 # firewall-cmd --reload
 
 WEB-L:
@@ -303,7 +303,7 @@ PermitRootLogin yes
 
 7. Обеспечьте настройку служб SSH региона Right:
 RTR-R:
-# firewall-cmd --permanent --add-forward-port=2244:proto=tcp:toport=22:toaddr=172.16.100.100
+# firewall-cmd --permanent --add-forward-port=port=2244:proto=tcp:toport=22:toaddr=172.16.100.100
 # firewall-cmd --reload
 
 WEB-R:
