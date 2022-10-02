@@ -1,0 +1,114 @@
+# dnf -y update
+# dnf -y install mdadm
+
+Настройка RAID уровня 0 в CentOS:
+    Посмотрим, какие диски есть на нашем сервере:
+    # lsblk
+    
+NAME                MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                   8:0    0  128G  0 disk
+├─sda1                8:1    0    1G  0 part /boot
+└─sda2                8:2    0  127G  0 part
+  ├─cl_centos8-root 253:0    0   50G  0 lvm  /
+  ├─cl_centos8-swap 253:1    0    2G  0 lvm  [SWAP]
+  └─cl_centos8-home 253:2    0   75G  0 lvm  /home
+sdb                   8:16   0    1G  0 disk
+sdc                   8:32   0    1G  0 disk
+sdd                   8:48   0    1G  0 disk
+
+    Как показано выше, к серверу подключены три необработанных диска ( sdb, sdc и sdd ). Мы начнем с очистки дисков, а затем разбиваем их на разделы, прежде чем создавать на них RAID:
+    # for i in sdb sdc sdd; do
+        sudo wipefs -a /dev/$i
+        sudo mdadm --zero-superblock /dev/$i
+    done
+
+    Создайте по одному разделу на каждом из дисков и установите флаг RAID:
+    # for i in sdb sdc sdd; do
+        sudo parted --script /dev/$i "mklabel gpt"
+        sudo parted --script /dev/$i "mkpart primary 0% 100%"
+        sudo parted --script /dev/$i "set 1 raid on"
+    done
+
+    Вы должны увидеть созданные новые разделы (sdb1, sdc1, sdd1):
+    # lsblk
+
+NAME                MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                   8:0    0  128G  0 disk
+├─sda1                8:1    0    1G  0 part /boot
+└─sda2                8:2    0  127G  0 part
+  ├─cl_centos8-root 253:0    0   50G  0 lvm  /
+  ├─cl_centos8-swap 253:1    0    2G  0 lvm  [SWAP]
+  └─cl_centos8-home 253:2    0   75G  0 lvm  /home
+sdb                   8:16   0    1G  0 disk
+└─sdb1                8:17   0 1022M  0 part
+sdc                   8:32   0    1G  0 disk
+└─sdc1                8:33   0 1022M  0 part
+sdd                   8:48   0    1G  0 disk
+└─sdd1                8:49   0 1022M  0 part
+
+    После того, как разделы будут готовы, перейдите к созданию устройства RAID 0. Чередование уровней аналогично RAID 0, поскольку предлагает только чередование данных:
+    # mdadm --create /dev/md0 --level=stripe --raid-devices=3 /dev/sd[b-d]1
+    Узнайте статус вашего RAID-устройства, используя любую из следующих команд:
+    # cat /proc/mdstat
+
+Personalities : [raid0]
+md0 : active raid0 sdd1[2] sdc1[1] sdb1[0]
+      3133440 blocks super 1.2 512k chunks
+
+unused devices: <none>
+
+    Или:
+    # mdadm --detail /dev/md0
+
+/dev/md0:
+           Version : 1.2
+     Creation Time : Wed Aug 26 21:20:57 2020
+        Raid Level : raid0
+        Array Size : 3133440 (2.99 GiB 3.21 GB)
+      Raid Devices : 3
+     Total Devices : 3
+       Persistence : Superblock is persistent
+
+       Update Time : Wed Aug 26 21:20:57 2020
+             State : clean
+    Active Devices : 3
+   Working Devices : 3
+    Failed Devices : 0
+     Spare Devices : 0
+
+            Layout : -unknown-
+        Chunk Size : 512K
+
+Consistency Policy : none
+
+              Name : centos8.localdomain:0  (local to host centos8.localdomain)
+              UUID : 2824d400:1967473c:dfa0938f:fbb383ae
+            Events : 0
+
+    Number   Major   Minor   RaidDevice State
+       0       8       17        0      active sync   /dev/sdb1
+       1       8       33        1      active sync   /dev/sdc1
+       2       8       49        2      active sync   /dev/sdd1
+
+    Если все выглядит красиво, создайте файловую систему по вашему выбору на новом устройстве RAID:
+    # mkfs.ext4 /dev/md0
+    Затем нам нужно смонтировать новое устройство в файловой системе, чтобы оно начало хранить файлы и каталоги. Создайте новую точку монтирования:
+    # mkdir /mnt/raid0
+    Настроить монтирование в /etc/fstab:
+    # echo "/dev/md0 /mnt/raid0 ext4 defaults 0 0" | sudo tee -a /etc/fstab
+    Убедитесь, что он может быть установлен правильно:
+    # mount -a
+    # df -hT
+
+Filesystem                  Type      Size  Used Avail Use% Mounted on
+devtmpfs                    devtmpfs  865M     0  865M   0% /dev
+tmpfs                       tmpfs     882M     0  882M   0% /dev/shm
+tmpfs                       tmpfs     882M   17M  865M   2% /run
+tmpfs                       tmpfs     882M     0  882M   0% /sys/fs/cgroup
+/dev/mapper/cl_centos8-root xfs        50G  2.1G   48G   5% /
+/dev/sda1                   ext4      976M  139M  770M  16% /boot
+/dev/mapper/cl_centos8-home xfs        75G  568M   75G   1% /home
+tmpfs                       tmpfs     177M     0  177M   0% /run/user/1000
+/dev/md0                    ext4      2.9G  9.0M  2.8G   1% /mnt/raid0    ##Our New Device.
+##########################################################################################################################
+
