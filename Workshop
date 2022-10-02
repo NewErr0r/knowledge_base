@@ -480,3 +480,23 @@ WEB-R:
 # vi /etc/chrony.conf
 server ntp.int.demo.wsr
 # systemctl restart chronyd.service
+
+5. Реализуйте файловый SMB-сервер на базе SRV
+SRV: (RAID1)
+# dnf -y install mdadm
+# lsblk
+# for i in sdb sdc; do
+  sudo wipefs -a /dev/$i
+  sudo mdadm --zero-superblock /dev/$i
+done
+# for i in sdb sdc; do
+  sudo parted --script /dev/$i "mklabel gpt"
+  sudo parted --script /dev/$i "mkpart primary 0% 100%"
+  sudo parted --script /dev/$i "set 1 raid on"
+done
+# mdadm --create /dev/md1 --level=raid1 --raid-devices=2 /dev/sd[b-d]1 --spare-devices=1 /dev/sdd1
+# mkfs.xfs /dev/md1
+# mkdir /mnt/storage
+# echo "/dev/md1 /mnt/storage xfs defaults 0 0" | sudo tee -a /etc/fstab
+# mount -a
+# df -hT
