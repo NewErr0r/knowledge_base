@@ -112,3 +112,74 @@ tmpfs                       tmpfs     177M     0  177M   0% /run/user/1000
 /dev/md0                    ext4      2.9G  9.0M  2.8G   1% /mnt/raid0    ##Our New Device.
 ##########################################################################################################################
 
+Настройка RAID уровня 1 в CentOS 8:
+
+    Прежде чем мы начнем, давайте очистим все диски перед тем, как мы начнем конфигурации RAID, чтобы убедиться, что мы начинаем с чистых дисков:
+    # for i in sdb sdc sdd; do
+        sudo wipefs -a /dev/$i
+        sudo mdadm --zero-superblock /dev/$i
+    done
+
+    Создайте по одному разделу на каждом из дисков и установите флаг RAID:
+    # for i in sdb sdc sdd; do
+        sudo parted --script /dev/$i "mklabel gpt"
+        sudo parted --script /dev/$i "mkpart primary 0% 100%"
+        sudo parted --script /dev/$i "set 1 raid on"
+    done
+
+    Создать устройство RAID 1:
+    # mdadm --create /dev/md1 --level=raid1 --raid-devices=2 /dev/sd[b-c]1 --spare-devices=1 /dev/sdd1
+
+    Проверьте статус нового массива:
+    # mdadm --detail /dev/md1
+    /dev/md1:
+           Version : 1.2
+     Creation Time : Wed Aug 26 21:32:52 2020
+        Raid Level : raid1
+        Array Size : 1045504 (1021.00 MiB 1070.60 MB)
+     Used Dev Size : 1045504 (1021.00 MiB 1070.60 MB)
+      Raid Devices : 2
+     Total Devices : 3
+       Persistence : Superblock is persistent
+
+       Update Time : Wed Aug 26 21:33:02 2020
+             State : clean
+    Active Devices : 2
+   Working Devices : 3
+    Failed Devices : 0
+     Spare Devices : 1
+
+Consistency Policy : resync
+
+              Name : centos8.localdomain:1  (local to host centos8.localdomain)
+              UUID : 9ca1da1d:a0c0a26b:6dd27959:a84dec0e
+            Events : 17
+
+    Number   Major   Minor   RaidDevice State
+       0       8       17        0      active sync   /dev/sdb1
+       1       8       33        1      active sync   /dev/sdc1
+
+       2       8       49        -      spare   /dev/sdd1
+
+       Когда устройство RAID будет готово, мы не сможем использовать его, если на нем нет файловой системы. Чтобы исправить это, создайте файловую систему, которая вам нужна. Ниже показан пример настройки xfs:
+       # mkfs.xfs /dev/md1
+
+       После этого создайте точку монтирования, в которую будет монтироваться устройство:
+       # mkdir /mnt/raid1
+       Снова настройте монтирование в /etc/fstab:
+       # echo "/dev/md1 /mnt/raid1 xfs defaults 0 0" | sudo tee -a /etc/fstab
+       Убедитесь, что он может быть установлен правильно:
+       # mount -a
+       # df -hT
+
+Filesystem                  Type      Size  Used Avail Use% Mounted on
+devtmpfs                    devtmpfs  865M     0  865M   0% /dev
+tmpfs                       tmpfs     882M     0  882M   0% /dev/shm
+tmpfs                       tmpfs     882M   17M  865M   2% /run
+tmpfs                       tmpfs     882M     0  882M   0% /sys/fs/cgroup
+/dev/mapper/cl_centos8-root xfs        50G  2.1G   48G   5% /
+/dev/sda1                   ext4      976M  139M  770M  16% /boot
+/dev/mapper/cl_centos8-home xfs        75G  568M   75G   1% /home
+tmpfs                       tmpfs     177M     0  177M   0% /run/user/1000
+/dev/md1                    xfs      1016M   40M  977M   4% /mnt/raid1
+##########################################################################################################################
