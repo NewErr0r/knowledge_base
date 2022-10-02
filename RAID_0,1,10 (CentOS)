@@ -183,3 +183,40 @@ tmpfs                       tmpfs     882M     0  882M   0% /sys/fs/cgroup
 tmpfs                       tmpfs     177M     0  177M   0% /run/user/1000
 /dev/md1                    xfs      1016M   40M  977M   4% /mnt/raid1
 ##########################################################################################################################
+
+Настройка RAID уровня 10 в CentOS 8:
+
+    Как и предыдущие уровни RAID, начните с очистки всех ваших сырых дисков:
+    # for i in sdb sdc sdd sde; do
+        sudo wipefs -a /dev/$i
+        sudo mdadm --zero-superblock /dev/$i
+    done
+
+    Создайте по одному разделу на каждом из дисков и установите флаг RAID:
+    # for i in sdb sdc sdd sde; do
+        sudo parted --script /dev/$i "mklabel gpt"
+        sudo parted --script /dev/$i "mkpart primary 0% 100%"
+        sudo parted --script /dev/$i "set 1 raid on"
+    done
+
+    Затем создайте устройство RAID 10 и проверьте его состояние:
+    # mdadm --create /dev/md10 --level=10 --raid-devices=4 dev/sd[b-e]1
+    # mdadm -–query --detail /dev/md10
+    После настройки устройства RAID создайте файловую систему, которая вам нужна. Ниже показан пример настройки xfs:
+    # mkfs.xfs /dev/md10
+
+    После этого создайте точку монтирования, в которую будет монтироваться устройство:
+    # mkdir /mnt/raid10
+
+    Настроить монтирование в /etc/fstab:
+    # echo "/dev/md10 /mnt/raid10 xfs defaults 0 0" | sudo tee -a /etc/fstab
+
+    Убедитесь, что он может быть установлен правильно:
+    # mount -a
+    # df -hT
+##########################################################################################################################
+Остановить и удалить массив RAID:
+# umount /mnt/raid0
+# mdadm --stop /dev/md0
+# mdadm --remove /dev/md0
+##########################################################################################################################
