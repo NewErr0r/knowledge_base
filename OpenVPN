@@ -78,7 +78,7 @@ comp-lzo no
 # systemctl start openvpn-server@server
 # systemctl status openvpn-server@server
 
-########################### Настройка доступа к локальной сети клиентам OpenVPN в Linux ########################################
+########################### Настройка доступа к локальной сети клиентам OpenVPN в Linux #########################################
 
 # vim /etc/openvpn/server/server.conf
 push "route 172.16.10.0 255.255.255.0"
