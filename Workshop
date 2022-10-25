@@ -351,7 +351,7 @@ rtr-l   IN  A   4.4.4.100
 # systemctl enable --now named.service
 
 RTR-L:
-# firewall-cmd --permanent --add-forward-port=port=53:proto={tcp/udp}:toport=53:toaddr=192.168.100.200
+# firewall-cmd --permanent --add-forward-port=port=53:proto={tcp,udp}:toport=53:toaddr=192.168.100.200
 
 2. Выполните настройку второго уровня DNS-системы стенда:
 SRV:
