@@ -1,0 +1,24 @@
+# dnf install -y openssl
+
+# mkdir /var/ca
+# cd /var/ca
+# cp /etc/pki/tls/openssl.cnf ./
+
+# vi openssl.cnf
+...
+[ CA_default ]
+dir     = /var/ca
+...
+[ req_distinguished_name ]
+countryName_default     = RU
+...
+0.organizationName_default  = DEMO.WSR
+
+
+# openssl genrsa -out ca.key 2048
+# openssl req -x509 -new -key ca.key -days 500 -config openssl.cnf -out ca.pem
+
+# openssl genrsa -out www.demo.key 2048
+# openssl req -new -key www.demo.key -out www.demo.csr -config openssl.cnf
+# openssl x509 -req -in www.demo.csr -CA ca.pem -CAkey ca.key -CAcreareserial -out www.demo.crt
+# openssl x509 -noout -text -in www.demo.crt | less
