@@ -220,3 +220,4 @@ tmpfs                       tmpfs     177M     0  177M   0% /run/user/1000
 # mdadm --stop /dev/md0
 # mdadm --remove /dev/md0
 ##########################################################################################################################
+https://www.dmosk.ru/miniinstruktions.php?mini=mdadm
