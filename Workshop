@@ -486,7 +486,7 @@ server ntp.int.demo.wsr
 # systemctl restart chronyd.service
 
 5. Реализуйте файловый SMB-сервер на базе SRV
-SRV: (RAID1)
+SRV:
 # dnf -y install mdadm
 # lsblk
 # for i in sdb sdc; do
