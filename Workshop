@@ -488,7 +488,7 @@ server ntp.int.demo.wsr
 5. Реализуйте файловый SMB-сервер на базе SRV
 SRV:
 # dnf -y install mdadm
-# lsblk
+
 # for i in sdb sdc; do
   sudo wipefs -a /dev/$i
   sudo mdadm --zero-superblock /dev/$i
@@ -502,5 +502,3 @@ done
 # mkfs.xfs /dev/md1
 # mkdir /mnt/storage
 # echo "/dev/md1 /mnt/storage xfs defaults 0 0" | sudo tee -a /etc/fstab
-# mount -a
-# df -hT
