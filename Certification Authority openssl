@@ -1,3 +1,4 @@
+#############################1-Вариант##############################
 # dnf install -y openssl
 
 # mkdir /var/ca
@@ -22,3 +23,33 @@ countryName_default     = RU
 # openssl req -new -key www.demo.key -out www.demo.csr -config openssl.cnf
 # openssl x509 -req -in www.demo.csr -CA ca.pem -CAkey ca.key -CAcreareserial -out www.demo.crt
 # openssl x509 -noout -text -in www.demo.crt | less
+
+#############################2-Вариант##############################
+# mkdir /var/ca
+# cd /var/ca
+# cp /etc/pki/tls/openssl.cnf ./
+
+# vi openssl.cnf
+...
+[ CA_default ]
+dir     = /var/ca
+...
+[ req_distinguished_name ]
+countryName_default     = RU
+...
+0.organizationName_default  = DEMO.WSR
+
+# openssl req -newkey rsa:4096 -keyform PEM -keyout ca.key -x509 -days 3650 -outfrom PEM -out ca.cer -config ./openssl.cnf
+Центр сертификации готов, на вызоде 2 файла: закрытый ключ "ca.key" и сертификат удостоверяющий данный Центр сертификации "ca.cer"
+
+Для веб-сервера создание запроса на подписание сертификата: 
+# scp <user>@<ip_address_CA>:/var/ca/openssl.cnf ./     (либо при создании запроса отвечать так как описано в том файле)
+# openssl genrsa -out www.key 4096
+# openssl req -new -key www.key -out www.req -sha256 -config ./openssl.cnf
+Сгенирирован закрытый ключ "www.key" и запрос "www.req" на выдачу сертификата, www.req необходимо передать на сервер CA
+
+Подписание запроса для веб-сервера:
+# openssl x509 -req -in www.req -CA ca.cer -CAkey ca.key -set_serial 100 -extentions www -days 1460 -outfrom PEM -out www.cer -sha256
+
+Для просмотра содержимого сертификата:
+# openssl x509 -noout -text -in www.cer | less
