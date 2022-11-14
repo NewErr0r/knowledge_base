@@ -1,0 +1,25 @@
+# vi /etc/nginx/sites-available.d/proxy.conf
+upstream backend {
+        server <ip_address>;
+        server <ip_address>;
+}
+
+server {
+        listen 443 ssl default_server;
+        server_name <name | ip_address>;
+
+        ssl_certificate /etc/pki/nginx/www.cer;
+        ssl_certificate_key /etc/pki/nginx/private/www.key;
+
+        location / {
+                proxy_pass http://backend;
+        }
+}
+
+server {
+        listen 80 default_server;
+        server_name <name | ip_address>;
+        return 302 https://<name | ip_address>;
+}
+
+# ln -s /etc/nginx/sites-available.d/proxy.conf /etc/nginx/sites-enabled.d/proxy.conf
