@@ -39,7 +39,7 @@ countryName_default     = RU
 ...
 0.organizationName_default  = DEMO.WSR
 
-# openssl req -newkey rsa:4096 -keyform PEM -keyout ca.key -x509 -days 3650 -outfrom PEM -out ca.cer -config ./openssl.cnf
+# openssl req -newkey rsa:4096 -keyform PEM -keyout ca.key -x509 -days 3650 -outform PEM -out ca.cer -config ./openssl.cnf
 Центр сертификации готов, на вызоде 2 файла: закрытый ключ "ca.key" и сертификат удостоверяющий данный Центр сертификации "ca.cer"
 
 Для веб-сервера создание запроса на подписание сертификата: 
@@ -49,7 +49,7 @@ countryName_default     = RU
 Сгенирирован закрытый ключ "www.key" и запрос "www.req" на выдачу сертификата, www.req необходимо передать на сервер CA
 
 Подписание запроса для веб-сервера:
-# openssl x509 -req -in www.req -CA ca.cer -CAkey ca.key -set_serial 100 -extentions www -days 1460 -outfrom PEM -out www.cer -sha256
+# openssl x509 -req -in www.req -CA ca.cer -CAkey ca.key -set_serial 100 -extentions www -days 1460 -outform PEM -out www.cer -sha256
 
 Для просмотра содержимого сертификата:
 # openssl x509 -noout -text -in www.cer | less
