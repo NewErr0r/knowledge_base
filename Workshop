@@ -487,18 +487,14 @@ server ntp.int.demo.wsr
 
 5. Реализуйте файловый SMB-сервер на базе SRV
 SRV:
-# dnf -y install mdadm
+# dnf install -y mdadm
+# mdadm --zero-superblock --force /dev/sd{b,c}
+# wipefs --all --force /dev/sd{b,c}
+# mdadm --create --verbose /dev/md0 -l 1 -n 2 /dev/sd{b,c}
+        Continue creating array? y
 
-# for i in sdb sdc; do
-  sudo wipefs -a /dev/$i
-  sudo mdadm --zero-superblock /dev/$i
-done
-# for i in sdb sdc; do
-  sudo parted --script /dev/$i "mklabel gpt"
-  sudo parted --script /dev/$i "mkpart primary 0% 100%"
-  sudo parted --script /dev/$i "set 1 raid on"
-done
-# mdadm --create /dev/md1 --level=raid1 --raid-devices=2 /dev/sd[b-d]1 --spare-devices=1 /dev/sdd1
-# mkfs.xfs /dev/md1
-# mkdir /mnt/storage
-# echo "/dev/md1 /mnt/storage xfs defaults 0 0" | sudo tee -a /etc/fstab
+# mkfs.ext4 /dev/md0
+# mkdir /mnt/share
+# chmod 777 /mnt/share
+# echo '/dev/md0 /mnt/share ext4 defaults 1 2' >> /etc/fstab
+# mount -a
