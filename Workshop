@@ -494,7 +494,34 @@ SRV:
         Continue creating array? y
 
 # mkfs.ext4 /dev/md0
-# mkdir /mnt/share
-# chmod 777 /mnt/share
-# echo '/dev/md0 /mnt/share ext4 defaults 1 2' >> /etc/fstab
+# mkdir /mnt/storage
+# chmod 777 /mnt/storage
+# echo '/dev/md0 /mnt/storage ext4 defaults 1 2' >> /etc/fstab
+# mount -a
+
+# dnf install -y samba
+# systemctl enable smb --now
+# vi /etc/samba/smb.conf
+[global] 
+    ...
+    map to guest = Bad Password
+    ...
+[storage]
+    comment = Public Folder
+    path = /mnt/storage
+    public = yes
+    writable = yes
+    read only = no
+    guest ok = yes
+    create mask = 0777
+    directory mask = 0777
+    force create mode = 0777
+    force directory mode = 0777
+# systemctl restart smb
+
+WEB-{L,R}
+# dnf install -y cifs-utils
+# mkdir /opt/share
+# chmod 777 /opt/share
+# echo '//srv.int.demo.wsr/storage /opt/share cifs guest 0 0' >> /etc/fstab
 # mount -a
