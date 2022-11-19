@@ -64,7 +64,7 @@ ONBOOT=yes
 IPADDR=4.4.4.100
 NETMASK=255.255.255.0
 GATEWAY=4.4.4.1
-DNS1=192.168.100.200
+DNS1=4.4.4.1
 DEVICE=enp0s3
 
 # vi /etc/sysconfig/network-scripts/ifcfg-enp0s8
@@ -87,7 +87,7 @@ ONBOOT=yes
 IPADDR=5.5.5.100
 NETMASK=255.255.255.0
 GATEWAY=5.5.5.1
-DNS1=192.168.100.200
+DNS1=4.4.4.100
 DEVICE=enp0s3
 
 # vi /etc/sysconfig/network-scripts/ifcfg-enp0s8
