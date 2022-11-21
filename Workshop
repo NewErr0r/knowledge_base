@@ -64,7 +64,6 @@ ONBOOT=yes
 IPADDR=4.4.4.100
 NETMASK=255.255.255.0
 GATEWAY=4.4.4.1
-DNS1=4.4.4.1
 DEVICE=enp0s3
 
 # vi /etc/sysconfig/network-scripts/ifcfg-enp0s8
@@ -74,6 +73,7 @@ NAME=enp0s8
 ONBOOT=yes
 IPADDR=192.168.100.254
 NETMASK=255.255.255.0
+DNS1=192.168.100.200
 DEVICE=enp0s8
 
 #systemctl restart NetworkManagers
@@ -87,7 +87,6 @@ ONBOOT=yes
 IPADDR=5.5.5.100
 NETMASK=255.255.255.0
 GATEWAY=5.5.5.1
-DNS1=4.4.4.100
 DEVICE=enp0s3
 
 # vi /etc/sysconfig/network-scripts/ifcfg-enp0s8
@@ -97,6 +96,7 @@ NAME=enp0s8
 ONBOOT=yes
 IPADDR=172.16.100.254
 NETMASK=255.255.255.0
+DNS1=192.168.100.200
 DEVICE=enp0s8
 
 #systemctl restart NetworkManagers
@@ -322,12 +322,13 @@ ISP:
 listen-on port 53 { any; };
 listen-on-v6 port 53 { any; };
 allow-query     { any; };
-forwarders { 4.4.4.100; };
+// forwarders { 4.4.4.100; };
+dnssec-validation no;
 ...
 zone "demo.wsr" IN {
     type master;
     file "demo.wsr"
-    allow-update { none; };
+    allow-transfer { none; };
 };
 
 # vi /var/named/demo.wsr
@@ -339,12 +340,13 @@ $TTL 86400
          604800      ;Expire
          86400       ;Minimum TTL
 )
-    IN  NS  isp.demo.wsr.
-isp IN  A   3.3.3.1
-www IN  A   4.4.4.100
-www IN  A   5.5.5.100
+        IN  NS  isp.demo.wsr.
+isp     IN  A   3.3.3.1
+www     IN  A   4.4.4.100
+www     IN  A   5.5.5.100
 internet    CNAME   isp.demo.wsr.
-rtr-l   IN  A   4.4.4.100
+int     IN NS   rtr-l.demo.wsr
+rtr-l   IN  A 4.4.4.100
 
 # firewall-cmd --permanent --add-service=dns
 # firewall-cmd --reload
