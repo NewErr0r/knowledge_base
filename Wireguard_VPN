@@ -1,0 +1,52 @@
+######### WG_Server ###########
+# dnf install -y epel-release elrepo-release
+# dnf install -y wireguard-tools
+
+# mkdir /etc/wireguard/keys
+# cd /etc/wireguard/keys
+# wg genkey | tee srv-sec.key | wg pubkey > srv-pub.key
+# wg genkey | tee cli-sec.key | wg pubkey > cli-pub.key
+
+# cat srv-sec.key cli-pub.key >> /etc/wireguard/wg0.conf
+# vi /etc/wireguard/wg0.conf
+  [Interface]
+  Address = <ip_tunnel_address/mask>
+  ListenPort = <port>
+  PrivateKey = <srv-sec.key>
+  
+  [Peer]
+  PublicKey = <cli-pub.key>
+  AllowdIPs = <network_tunnel/mask>, <network/mask>
+  
+# firewall-cmd --permanent --add-port=<port>/{tcp,udp}
+# firewall-cmd --reload
+  
+# systemctl enable --now wg-quick@wg0
+# wg show wg0
+  
+######### WG_Client ###########
+# dnf install -y epel-release elrepo-release
+# dnf install -y wireguard-tools
+
+# mkdir /etc/wireguard/keys
+# cd /etc/wireguard/keys
+# scp root@<ip_wg_server>:/etc/wireguard/keys/cli-sec.key ./
+# scp root@<ip_wg_server>:/etc/wireguard/keys/srv-pub.key ./
+
+# cat cli-sec.key srv-pub.key >> /etc/wireguard/wg0.conf
+# vi /etc/wireguard/wg0.conf
+  [Interface]
+  Address = <ip_tunnel_address/mask>
+  PrivateKey = <cli-sec.key>
+  
+  [Peer]
+  PublicKey = <srv-pub.key>
+  Endpoint = <ip_public_address_wg_server>:<port>
+  AllowdIPs = <network_tunnel/mask>, <network/mask>
+  PersistentKeepalive = 10
+  
+# firewall-cmd --permanent --add-port=<port>/{tcp,udp}
+# firewall-cmd --reload
+
+# systemctl enable --now wg-quick@wg0
+# wg show wg0  
