@@ -530,3 +530,24 @@ WEB-{L,R}
 # chmod 777 /opt/share
 # echo '//srv.int.demo.wsr/storage /opt/share cifs guest 0 0' >> /etc/fstab
 # mount -a
+
+6. Выполните настройку центра сертификации на базе SRV:
+SRV:
+# dnf install -y openssl
+
+# mkdir /var/ca
+# cd /var/ca
+# cp /etc/pki/tls/openssl.cnf ./
+
+# vi openssl.cnf
+...
+[ CA_default ]
+dir     = /var/ca
+...
+[ req_distinguished_name ]
+countryName_default     = RU
+...
+0.organizationName_default  = DEMO.WSR
+
+
+# openssl req -newkey rsa:2048 -keyform PEM -keyout ca.key -x509 -days 3650 -outform PEM -out ca.cer -config ./openssl.cnf
