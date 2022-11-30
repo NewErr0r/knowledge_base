@@ -1,0 +1,40 @@
+WireGuard - ALT Linux
+
+# su -
+# apt-get update
+# apt-get install -y wireguard-tools
+
+# mkdir -p /etc/wireguard/keys
+# cd /etc/wireguard/keys
+
+# wg genkey | tee srv-sec.key | wg pubkey > srv-pub.key
+# wg genkey | tee cli-sec.key | wg pubkey > cli-pub.key
+
+# vi /etc/systemd/network/wg.netdev
+  [NetDev]
+  Name        = wg
+  Kind        = wireguard
+
+  [WireGuard]
+  ListenPort  = 51820
+  PrivateKey  = <содержимое файла: "srv-sec.key">
+
+  [WireGuardPeer]
+  PublicKey   = <содержимое файла: "cli-pub.key">
+  AllowedIPs  = 192.168.123.253/32,192.168.1.0/24 # Первый адрес — сам клиент, второй — его внутренняя сеть.
+  
+# vi /etc/systemd/network/wg.network
+  [Match]
+  Name        = wg
+
+  # Адрес сервера: как для взаимодействия с клиентами, так и им между собой
+  [Network]
+  Address     = 192.168.123.254/24
+
+  # Пример маршрутизации в сеть клиента из предыдущего конфига
+  [Route]
+  Destination = 192.168.1.0/24
+  Gateway     = 192.168.123.254
+  
+# reboot
+  
