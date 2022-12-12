@@ -1,0 +1,11 @@
+# dnf install -y dhcp-relay
+
+# cp /lib/systemd/system/dhcrelay.service /etc/systemd/system/
+# vi /etc/systemd/system/dhcrelay.service
+...
+ExecStart=/usr/sbin/dhcrelay -d --no-pid <ip_address_dhcp_server>
+...
+
+# systemctl --system daemon-reload
+# systemctl restart dhcrelay
+# systemctl enable dhcrelay
